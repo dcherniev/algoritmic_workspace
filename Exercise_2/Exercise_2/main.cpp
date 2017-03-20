@@ -123,6 +123,72 @@ int binary_search_helper
     }
 }
 
+
+int binary_search_helper_v_3
+(
+    const  vector<int>& v,
+    size_t begin,
+    size_t end,
+    int key,
+    size_t depth = 0
+)
+{
+    assert(depth < 1000);
+    assert(std::is_sorted(v.begin(), v.end()));
+    if(begin < end)
+    {
+         // [b, e) = [b, m) U [m] U [m, e)
+        size_t m = (begin + end) / 2;
+        assert((m-begin) + (end-m) == (end-begin));
+        if (key < v[m]) {
+            return binary_search_helper_v_3(v, begin, m, key, depth+1);
+        } else if (v[m] < key) {
+            return binary_search_helper_v_3(v, m, end, key, depth+1);
+        } else if ( begin <= m-1 && key == v[m-1]) {
+            return binary_search_helper_v_3(v, begin, m, key, depth+1);
+        } else {
+            return m;
+        }
+    }
+}
+
+int binary_search
+(
+    const  vector<int>& vec,
+    int x1,
+    int x2,
+    int key
+)
+{
+    assert(std::is_sorted(vec.begin(), vec.end()));
+
+    size_t b = 0;
+    size_t e = vec.size();
+
+    //if(b == e)
+   //     return -1;
+
+    while( b < e){
+        //assert(b < e);
+         // [b, e) = [b, m) U [m] U [m, e)
+        size_t m = b + (e - b) / 2;// способ деления на два между двумя довольно большими числами
+        //>>k /2^k
+        // size_t m = b + (e - b)>>1;
+        //assert((m-begin) + (end-m) == (end-begin));
+        if (key < vec[m]) {
+            e = m;
+        } else if (vec[m] < key) {
+            b= m+1;
+        //} else if ( b <= m-1 && key == vec[m-1]) {
+        //     e = m;
+        } else {
+            return m;
+        }
+    }
+
+    return -1;
+}
+
 void test_search() {
 
     typedef vector<int> Array;
@@ -186,6 +252,41 @@ void test_binary_search() {
      std::cout<< "Compleated testing!"<< std::endl;
 }
 
+void test_binary_search_2() {
+
+    typedef vector<int> Array;
+
+    auto search = binary_search;
+
+    auto key = 8;
+    auto b=0;
+    std::cout<< "Start testing:"<< std::endl;
+    std::cout<< "key not exists in array:"<< std::endl;
+    // key not exists in array
+        test(-1, search, Array(), b, b, key); // degerate
+        test(-1, search, Array({key-1}), b, b+1, key); // trivial
+        test(-1, search, Array({key-1, key+1}), b, b+2, key); // trivial2
+        test(-1, search, Array({1,2,3,4,5,7}), b, b+6, key); // general
+        test(-1, search, Array({9,10,11,12}), b, b+4, key); // general
+        test(-1, search, Array({0,1,3,7,10}), b, b+5, key); // general
+    // key exists in array
+    std::cout<< "key exists in array:"<< std::endl;
+        // non appliable // degerate
+        test(0, search, Array({key}), b, b+1, key); // trivial
+        test(0, search, Array({key, key+1}),b, b+2, key); // trivial2
+        test(1, search, Array({key-1, key}), b, b+2, key); // trivial2
+        test(8, search, Array({0,1,2,3,4,5,6,7,key}), b, b+9, key); // general
+        test(0, search, Array({key, 9,10,11,12}), b, b+5, key); // general
+        test(4, search, Array({0,1,2,5,key,9,10}), b, b+7, key); // general
+
+        test(4, search, Array({1,1,5,5,key,key,9,9,10,10}), b, b+8, key); // general
+        test(2, search, Array({0,1,key,key,11}), b, b+5, key); // general
+        test(1, search, Array({1,key,key,key,18}), b, b+5, key); // general
+        test(0, search, Array({key,key,key,key,key,key,key}), b, b+7, key); // general
+     std::cout<< "Compleated testing!"<< std::endl;
+}
+
+
 
 /*int main(int argc, char const *argv[])
 {
@@ -197,6 +298,6 @@ void test_binary_search() {
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    test_binary_search();
+    test_binary_search_2();
     return a.exec();
 }
