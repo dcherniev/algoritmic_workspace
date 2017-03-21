@@ -218,7 +218,7 @@ void test_search() {
      std::cout<< "Compleated testing!"<< std::endl;
 }
 
-void test_binary_search() {
+void test_binary_search_1() {
 
     typedef vector<int> Array;
 
@@ -252,11 +252,11 @@ void test_binary_search() {
      std::cout<< "Compleated testing!"<< std::endl;
 }
 
-void test_binary_search_2() {
+void test_binary_search_recursive() {
 
     typedef vector<int> Array;
 
-    auto search = binary_search;
+    auto search = binary_search_helper;
 
     auto key = 8;
     auto b=0;
@@ -286,7 +286,64 @@ void test_binary_search_2() {
      std::cout<< "Compleated testing!"<< std::endl;
 }
 
+size_t homework_binary_search(const std::vector<int> &vec, int key)
+{
+   assert(std::is_sorted(vec.begin(),vec.end()));
 
+   size_t v_begin = 0;
+   size_t v_end = vec.size();
+
+   while(v_begin < v_end) {
+      size_t v_mid = (v_begin +v_end)/2;
+      if(key < vec[v_mid]) {
+          v_end = v_mid;
+      }
+      else if(vec[v_mid] < key) {
+          v_begin = v_mid+1;
+      }
+      else if(v_begin <= v_mid -1 && vec[v_mid -1]==key) {
+           v_end = v_mid;
+      }
+      else {
+        return v_mid;
+      }
+   }
+
+   return -1;
+}
+
+void test_of_homework_binary_search() {
+
+    typedef vector<int> Array;
+
+    auto search = homework_binary_search;
+
+    auto key = 8;
+    std::cout<< "Start testing:"<< std::endl;
+    std::cout<< "key not exists in array:"<< std::endl;
+    // key not exists in array
+        test(-1, search, Array(), key); // degerate
+        test(-1, search, Array({key-1}), key); // trivial
+        test(-1, search, Array({key-1, key+1}), key); // trivial2
+        test(-1, search, Array({1,2,3,4,5,7}), key); // general
+        test(-1, search, Array({9,10,11,12}), key); // general
+        test(-1, search, Array({0,1,3,7,10}), key); // general
+    // key exists in array
+    std::cout<< "key exists in array:"<< std::endl;
+        // non appliable // degerate
+        test(0, search, Array({key}), key); // trivial
+        test(0, search, Array({key, key+1}), key); // trivial2
+        test(1, search, Array({key-1, key}), key); // trivial2
+        test(8, search, Array({0,1,2,3,4,5,6,7,key}), key); // general
+        test(0, search, Array({key, 9,10,11,12}), key); // general
+        test(4, search, Array({0,1,2,5,key,9,10}), key); // general
+
+        test(4, search, Array({1,1,5,5,key,key,9,9,10,10}), key); // general
+        test(2, search, Array({0,1,key,key,11}), key); // general
+        test(1, search, Array({1,key,key,key,18}), key); // general
+        test(0, search, Array({key,key,key,key,key,key,key}), key); // general
+     std::cout<< "Compleated testing!"<< std::endl;
+}
 
 /*int main(int argc, char const *argv[])
 {
@@ -294,10 +351,9 @@ void test_binary_search_2() {
     return 0;
 }*/
 
-
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    test_binary_search_2();
+    test_of_homework_binary_search();
     return a.exec();
 }
