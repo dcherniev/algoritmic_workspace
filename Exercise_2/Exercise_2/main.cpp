@@ -312,22 +312,114 @@ size_t homework_binary_search(const std::vector<int> &vec, int key)
    return -1;
 }
 
-void test_of_homework_binary_search() {
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+size_t lower_bound ( const std::vector<int> &vec, int key)
+{
+    size_t begin = 0;
+    size_t end = vec.size();
+    while(begin < end)
+    {
+        size_t median = begin + (end - begin)/2;
+        if(vec[median]<key)
+        {
+            begin = median+1;
+        }
+        else
+        {
+           end = median;
+        }
+    }
+    return end;
+}
+
+size_t upper_bound ( const std::vector<int> &vec, int key)
+{
+    size_t begin = 0;
+    size_t end = vec.size();
+    while(begin < end)
+    {
+        size_t median = begin + (end - begin)/2;
+        if(key < vec[median])
+        {
+            end = median;
+        }
+        else
+        {
+            begin = median+1;
+        }
+    }
+    return end;
+}
+
+
+size_t lb_binary_search ( const std::vector<int> &vec, int key)
+{
+    size_t end = vec.size();
+    size_t lb = lower_bound(vec, key);
+    if((lb != end) && !(key < vec[lb]))
+        return lb;
+
+    return end;
+}
+
+template< class TIter, class T>
+TIter lower_bound_iter( TIter begin, TIter end, T& key )
+{
+    while(begin < end)
+    {
+        auto median = begin + (end - begin)/2;
+        if((*median)<key)
+        {
+            begin = median+1;
+        }
+        else
+        {
+           end = median;
+        }
+    }
+    return end;
+}
+
+template< class TIter, class T>
+TIter lb_binary_search_iter(TIter begin, TIter end, T& key )
+{
+    TIter lb = lower_bound(begin, end, key);
+    if((lb != end) && !(key < (*lb)))
+        return lb;
+
+    return end;
+}
+
+size_t ub_binary_search ( const std::vector<int> &vec, int key)
+{
+    size_t end = vec.size();
+    size_t ub = upper_bound(vec, key);
+    if((ub != end) && !(vec[ub]<key))
+        return ub;
+
+    return end;
+}
+
+void test_binary_search_by_lower_bound() {
 
     typedef vector<int> Array;
 
-    auto search = homework_binary_search;
+    auto search = lb_binary_search;
 
     auto key = 8;
     std::cout<< "Start testing:"<< std::endl;
     std::cout<< "key not exists in array:"<< std::endl;
     // key not exists in array
-        test(-1, search, Array(), key); // degerate
-        test(-1, search, Array({key-1}), key); // trivial
-        test(-1, search, Array({key-1, key+1}), key); // trivial2
-        test(-1, search, Array({1,2,3,4,5,7}), key); // general
-        test(-1, search, Array({9,10,11,12}), key); // general
-        test(-1, search, Array({0,1,3,7,10}), key); // general
+        test(0, search, Array(), key); // degerate
+        test(1, search, Array({key-1}), key); // trivial
+        test(1, search, Array({key+1}), key); // trivial
+        test(2, search, Array({key-1, key+1}), key); // trivial2
+        test(6, search, Array({1,2,3,4,5,7}), key); // general
+        test(4, search, Array({9,10,11,12}), key); // general
+        test(5, search, Array({0,1,3,7,10}), key); // general
     // key exists in array
     std::cout<< "key exists in array:"<< std::endl;
         // non appliable // degerate
@@ -342,8 +434,94 @@ void test_of_homework_binary_search() {
         test(2, search, Array({0,1,key,key,11}), key); // general
         test(1, search, Array({1,key,key,key,18}), key); // general
         test(0, search, Array({key,key,key,key,key,key,key}), key); // general
+
+        test(0, search, Array({key,key,key+1,key+2}), key); // general
+        test(2, search, Array({key-2,key-1,key,key}), key); // general
+        test(2, search, Array({1,7,key,key}), key); // general
      std::cout<< "Compleated testing!"<< std::endl;
 }
+
+void test_binary_search_by_upper_bound() {
+
+    typedef vector<int> Array;
+
+    auto search = ub_binary_search;
+
+    auto key = 8;
+    std::cout<< "Start testing:"<< std::endl;
+    std::cout<< "key not exists in array:"<< std::endl;
+    // key not exists in array
+        test(0, search, Array(), key); // degerate
+        test(1, search, Array({key-1}), key); // trivial
+        test(1, search, Array({key+1}), key); // trivial2
+        test(2, search, Array({key-1, key+1}), key); // trivial2
+        test(6, search, Array({1,2,3,4,5,7}), key); // general
+        test(4, search, Array({9,10,11,12}), key); // general
+        test(5, search, Array({0,1,3,7,10}), key); // general
+    // key exists in array
+    std::cout<< "key exists in array:"<< std::endl;
+        // non appliable // degerate
+        test(0, search, Array({key}), key); // trivial
+        test(0, search, Array({key, key+1}), key); // trivial2
+        test(1, search, Array({key-1, key}), key); // trivial2
+        test(8, search, Array({0,1,2,3,4,5,6,7,key}), key); // general
+        test(0, search, Array({key, 9,10,11,12}), key); // general
+        test(4, search, Array({0,1,2,5,key,9,10}), key); // general
+
+        test(4, search, Array({1,1,5,5,key,key,9,9,10,10}), key); // general
+        test(3, search, Array({0,1,key,key,11}), key); // general
+        test(3, search, Array({1,key,key,key,18}), key); // general
+        test(6, search, Array({key,key,key,key,key,key,key}), key); // general
+     std::cout<< "Compleated testing!"<< std::endl;
+}
+
+void test_search_EX(){
+    typedef vector<int> Array;
+
+    auto search = [](const vector<int> & v, int key)
+    {
+        auto r = lb_binary_search_iter(v.begin(), v.end(), key);
+        return r !=v.end() ? r-v.begin():v.end()-v.begin();//-1;
+    };
+
+    auto key = 8;
+    std::cout<< "Start testing:"<< std::endl;
+    std::cout<< "key not exists in array:"<< std::endl;
+    // key not exists in array
+        test(0, search, Array(), key); // degerate
+        test(1, search, Array({key-1}), key); // trivial
+        test(1, search, Array({key+1}), key); // trivial
+        test(2, search, Array({key-1, key+1}), key); // trivial2
+        test(6, search, Array({1,2,3,4,5,7}), key); // general
+        test(4, search, Array({9,10,11,12}), key); // general
+        test(5, search, Array({0,1,3,7,10}), key); // general
+    // key exists in array
+    std::cout<< "key exists in array:"<< std::endl;
+        // non appliable // degerate
+        test(0, search, Array({key}), key); // trivial
+        test(0, search, Array({key, key+1}), key); // trivial2
+        test(1, search, Array({key-1, key}), key); // trivial2
+        test(8, search, Array({0,1,2,3,4,5,6,7,key}), key); // general
+        test(0, search, Array({key, 9,10,11,12}), key); // general
+        test(4, search, Array({0,1,2,5,key,9,10}), key); // general
+
+        test(4, search, Array({1,1,5,5,key,key,9,9,10,10}), key); // general
+        test(2, search, Array({0,1,key,key,11}), key); // general
+        test(1, search, Array({1,key,key,key,18}), key); // general
+        test(0, search, Array({key,key,key,key,key,key,key}), key); // general
+
+        test(0, search, Array({key,key,key+1,key+2}), key); // general
+        test(2, search, Array({key-2,key-1,key,key}), key); // general
+        test(2, search, Array({1,7,key,key}), key); // general
+     std::cout<< "Compleated testing!"<< std::endl;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//template< class Iter, class T>
+//auto search  = bs_by_lb <Array::iterator, int>;
 
 /*int main(int argc, char const *argv[])
 {
@@ -354,6 +532,6 @@ void test_of_homework_binary_search() {
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    test_of_homework_binary_search();
+    test_binary_search_by_upper_bound();
     return a.exec();
 }
