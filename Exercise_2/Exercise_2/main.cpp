@@ -18,6 +18,8 @@ void test(TResult expect, TFunc f, TParam1 p1) {
     auto got = f(p1);
     if(got != expect) {
         cerr << "failed: " << expect << " != " << got << endl;
+    }else{
+        std::cout<< "Test passed!"<< std::endl;
     }
 }
 
@@ -391,7 +393,7 @@ size_t upper_bound ( const std::vector<int> &vec, int key)
             begin = median+1;
         }
     }
-    return end;
+    return end;//can be begin
 }
 
 size_t ub_binary_search ( const std::vector<int> &vec, int key)
@@ -593,8 +595,206 @@ void test_search_EX_2(){
      std::cout<< "Compleated testing!"<< std::endl;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/*size_t find_min_element ( const std::vector<int> &vec )
+{
+    size_t begin = 0;
+    size_t end = vec.size();
+    size_t min_elem_id = begin;
+
+    if(begin == end)
+        return end;
+
+    while(begin++ != end)
+    {
+
+        if(vec[begin] < vec[min_elem_id])
+        {
+           min_elem_id = begin;
+        }
+    }
+
+    return min_elem_id;
+}*/
+
+template <class TIter>
+TIter min_elem_iter(TIter b, TIter e) {
+    auto result = b;
+    while (b < e){
+        // [) = [processed) [current] [unprocessed)
+        // assert(result - is minimum from [processed))
+        if(*b < *result){
+            result = b;
+        }
+        ++b;
+        //assert(tmp is min from [processed))
+    }
+    return result;
+}
+
+
+/*void test_min_elem_search() {
+
+    typedef vector<int> Array;
+
+    auto search = find_min_element;
+
+    auto key = 2;
+    std::cout<< "Start testing:"<< std::endl;
+    // key not exists in array
+        test(0, search, Array()); // degerate
+        // non appliable // trivial
+    // key exists in array
+        // non appliable // degerate
+        test(0, search, Array({key})); // trivial
+        test(0, search, Array({key, key+1})); // trivial2
+        test(0, search, Array({key-1, key})); // trivial2
+        test(8, search, Array({17,8,6,23,74,85,6,11,key})); // general
+        test(0, search, Array({key, 9,10,11,12})); // general
+        test(2, search, Array({90,5,key,7,10})); // general
+
+        test(2, search, Array({key,8,key,7,10})); // general
+        test(4, search, Array({5,7,key,7,key}), key); // general
+     std::cout<< "Compleated testing!"<< std::endl;
+}*/
+
+template <class TIter>
+TIter naive_sort(TIter b, TIter e) {
+    for (auto i = b; i < e ; ++i)
+    {
+        assert(is_sorted(b,i));
+        // [sorted) U [unsorted) = [b , i) U [i , e)
+        for (auto j = i+1; j < e ; ++j)
+        {
+            // [unsorted) = [i] U [i+1, j) U [j, e)
+            assert(min_element(i, j) == 1);
+            if(*j < *i)
+                swap(*i, *j);
+
+        }
+        assert(is_sorted(b,i+1));
+    }
+
+}
+
+
+template <class TIter>
+TIter selection_sort(TIter b, TIter e) {
+    for (auto i = b; i < e ; ++i)
+    {
+        assert(is_sorted(b,i));
+        // [sorted) U [unsorted) = [b , i) U [i , e)
+        swap(*i, *min_elem_iter(i, e));
+
+    }
+    return b;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <class TIter>
+TIter my_personal_min_element_search( TIter b, TIter e )
+{
+    TIter min_el = b;
+    while(b < e)
+    {
+        if( *b < *min_el )
+            min_el = b;
+        ++b;
+    }
+    return min_el;
+}
+
+
+template <class TIter>
+TIter my_personal_selection_sort( TIter b, TIter e )
+{
+    for(TIter i = b; i < e ; ++i)
+    {
+        TIter min_elem = my_personal_min_element_search(i, e);
+        //std::cout<< "Got min ["<<min_elem - b<<"]"<< std::endl;
+        //if( *min_elem < *i );
+            swap( *i , *min_elem);
+    }
+    return b;
+}
+
+template <class TIter>
+TIter bubble_sort( TIter b, TIter e )
+{
+    if(b == e)
+        return e;
+    auto sorted_begin = e - 1;
+    while (b < sorted_begin)
+    {
+        // [unsorted) U [sorted) = [b , sb) U [sb , e)
+        // (sorted_begin < e)
+        assert (sorted_begin < e);
+        assert (is_sorted(sorted_begin, e));
+
+        auto j = b;
+        while (j  < sorted_begin)
+        {
+            if(*(j +1) < *j){
+               std::iter_swap(j+1, j);
+            }
+            ++j;
+        }
+        /*for (auto j = b; j < sorted_begin; ++j){
+            //assert(std::reverse::max_element(b, j+1) = j);// just max_element assert in case of two equal values will not pass
+            if(*(j +1) < *j){
+               std::iter_swap(j+1, j);
+            }
+            //assert(std::reverse::max_element(b, j+1) = j);
+        }*/
+
+        --sorted_begin;
+        assert (is_sorted(sorted_begin, e));
+    }
+    return b;
+}
+
+
+
+
+void test_array_sort() {
+
+    typedef vector<int> Array;
+    //typedef Array::iterator iter;
+
+
+    auto sort = [](const vector<int> & v)
+    {
+        auto u = v;
+        bubble_sort(u.begin(), u.end());
+        return u;
+    };
+
+
+    std::cout<< "Start testing:"<< std::endl;
+        test(Array(), sort, Array()); // degerate
+        test(Array({1, 2}), sort, Array({1, 2})); // trivial
+        test(Array({1, 2}), sort, Array({2, 1})); // trivial2
+        test(Array({1, 1}), sort, Array({1, 1})); // trivial2
+
+        test(Array({1, 1, 1}), sort, Array({1, 1, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({1, 2, 3})); // general
+        test(Array({1, 2, 3}), sort, Array({3, 2, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({2, 3, 1})); // general
+
+        test(Array({0, 1, 5, 5, 6, 7, 8}), sort, Array({8, 5, 1, 7, 6, 0, 5})); // general
+
+
+     std::cout<< "Compleated testing!"<< std::endl;
+}
+
+
+
+
+
 
 
 //template< class Iter, class T>
@@ -609,6 +809,6 @@ void test_search_EX_2(){
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    test_search_EX_2();
+    test_array_sort();
     return a.exec();
 }
