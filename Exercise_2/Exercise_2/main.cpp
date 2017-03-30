@@ -791,11 +791,329 @@ void test_array_sort() {
      std::cout<< "Compleated testing!"<< std::endl;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+template <class TIter>
+TIter get_ub_index( TIter b, TIter e, TIter key_id )
+{
+    while(b < e)
+    {
+        TIter  m = b + (e - b)/2;
+        if(*key_id < *m)
+        {
+            e = m;
+        }
+        else
+        {
+            b = m + 1;
+        }
+    }
+
+    return e;
+}
+
+template <class TIter>
+void insert_el_in_ub_of_sorted( TIter b, TIter e, TIter n_el )
+{
+   TIter ub_index = get_ub_index(b, e, n_el);
+
+   // if((begin != end) && !(ub - 1 < begin) && !(*(ub - 1)<key))
+   if (b != e)
+   {
+       if(!(ub_index - 1 < b))
+       {
+           if(*(ub_index - 1) < *(n_el))
+           {
+                cout << "upper bound was found!" << endl;
+                while( ub_index-1 < e )
+                {
+                   cout << "curr upper bound [" << ub_index-1-b << "][" << *(ub_index-1) << "]" << endl;
+                   std::iter_swap(ub_index-1, n_el);
+                   ub_index++;
+                }
+           }
+       }
+   }
+
+}
+
+template <class TIter>
+TIter insert_sort( TIter b, TIter e )
+{
+    TIter pivot = b;
+
+    while (pivot < e)
+    {
+        //assert(std::is_sorted(b,m));
+        //[sorted)[current_max_elem][unsorted);
+        if(*(pivot+1) < *pivot)
+        {
+            //insert m+1 in upper bound of [sorted)
+            cout << "calling insert_el_in_ub_of_sorted[" << 0 << "][" << pivot-b << "][" << (pivot+1)-b << "]" << endl;
+            cout << "calling insert_el_in_ub_of_sorted[" << *b << "][" << *pivot << "][" << *(pivot+1) << "]" << endl;
+            insert_el_in_ub_of_sorted( b, pivot, pivot+1 );
+        }
+        //
+        //assert(std::is_sorted(b,m));
+        pivot++;
+    }
+
+    return b;
+}*/
+
+template <class TIter>
+TIter real_insert_sort( TIter b, TIter e )
+{
+    if( b == e)
+    {
+       return e;
+    }
+    TIter pivot = b+1;
+    while (pivot < e){
+        if( b == e )
+        {
+            cout << "b == e!" << endl;
+        }
+        assert(std::is_sorted(b,pivot));
+        //[b,pivot)[pivot][pivot + 1, e);
+        auto i = pivot;
+        while (b < i && *i < *(i-1)){
+            assert(std::is_sorted(b,i));
+            assert(std::is_sorted(i,pivot));
+            std::iter_swap(i, i-1);
+            --i;
+            assert(std::is_sorted(b,i));
+            assert(std::is_sorted(i,pivot));
+        }
+        //
+        assert(std::is_sorted(b,pivot));
+        ++pivot;
+    }
+    return b;
+}
+
+
+void test_insert_sort() {
+
+    typedef vector<int> Array;
+
+    auto sort = [](const vector<int> & v)
+    {
+        auto u = v;
+        real_insert_sort(u.begin(), u.end());
+        return u;
+    };
+
+
+    std::cout<< "Start testing:"<< std::endl;
+        test(Array(), sort, Array()); // degerate
+        test(Array({1, 2}), sort, Array({1, 2})); // trivial
+        test(Array({1, 2}), sort, Array({2, 1})); // trivial2
+        test(Array({1, 1}), sort, Array({1, 1})); // trivial2
+
+        test(Array({1, 1, 1}), sort, Array({1, 1, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({1, 2, 3})); // general
+        test(Array({1, 2, 3}), sort, Array({3, 2, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({2, 3, 1})); // general
+
+        test(Array({0, 1, 5, 5, 6, 7, 8}), sort, Array({8, 5, 1, 7, 6, 0, 5})); // general
+
+
+     std::cout<< "Compleated testing!"<< std::endl;
+}
+
+
+//python
+/*
+def merge_sort(v):
+ if(len(v) > 1):
+    m = len(v) // 2
+
+    left = merge_sort(v[:m])
+    right = merge_sort(v[m:])
+
+
+    v = merge (left, right)
+ return v
+
+*/
+/*
+template <class TIter>
+const std::vector<int>& my_epic_merge( const std::vector<int> &vec_1, const std::vector<int> &vec_2 )
+{
+    std::vector<int> vec_r;
+    TIter b_1 = vec_1.begin();
+    TIter e_1 = vec_1.end();
+    TIter b_2 = vec_2.begin();
+    TIter e_2 = vec_2.end();
+
+    while (b_1 < e_1 && b_2 < e_2 )
+    {
+        if(*b_1 < *b_2)
+        {
+            vec_r.push_back(*b_1);
+            ++b_1;
+        }
+        else
+        {
+            vec_r.push_back(*b_2);
+            ++b_2;
+        }
+
+    }
+
+    if(b_1 == e_1)
+    {
+        while (b_2 < e_2 )
+        {
+            vec_r.push_back(*b_2);
+            ++b_2;
+        }
+    }
+    else if(b_2 == e_2)
+    {
+        while (b_1 < e_1)
+        {
+            vec_r.push_back(*b_1);
+            ++b_1;
+        }
+    }
+
+    return  vec_r;
+}
+*/
+//continue
+
+template <class TIter>
+void merge_iter( TIter b, TIter m, TIter e, TIter buff )
+{
+
+    const auto size = e - b;
+    const auto old = buff;
+
+    TIter b_1 = b;
+    TIter e_1 = m;
+    TIter b_2 = m;
+    TIter e_2 = e;
+
+    while (b_1 < e_1 && b_2 < e_2 )
+    {
+        if(*b_1 < *b_2)
+        {
+            //cout << "Add 1[" << *b_1 << "]" << endl;
+            //std::copy(b_1, ++b_1, buff);
+            *buff = *b_1++;
+        }
+        else
+        {
+            //cout << "Add 2[" << *b_2 << "]" << endl;
+            //std::copy(b_2, ++b_2, buff);
+            *buff = *b_2++;
+        }
+        ++buff;
+
+    }
 
 
 
+    /*
+     while (b_1 < e_1 && b_2 < e_2){
+        *buff++ = *b_1 < *b_2 ? *b_1++ : *b_2++;
+     }
+    */
 
 
+    /*if(b_1 == e_1)
+    {
+        while (b_2 < e_2 )
+        {
+            //std::iter_swap(b_2, buff);
+            cout << "Add 2[" << *b_2 << "]" << endl;
+            std::copy(b_2, ++b_2, buff);
+            ++buff;
+            //++b_2;
+        }
+    }
+    else if(b_2 == e_2)
+    {
+        while (b_1 < e_1)
+        {
+            //std::iter_swap(b_1, buff);
+            cout << "Add 1[" << *b_1 << "]" << endl;
+            std::copy(b_1, ++b_1, buff);
+            ++buff;
+            //++b_1;
+        }
+    }*/
+
+    buff = copy(b_1, e_1, buff);
+    buff = copy(b_2, e_2, buff);//if b_1 ==e_1 || b_2 == e_2  copy will not copy anything
+    assert(buff-old == size);
+
+}//O(N)
+
+
+template <class TIter>
+void merge_sort_outer(TIter b, TIter e, TIter buff){
+    auto size = e - b;
+    if(size > 1) {
+        auto m = b + size/2;
+        merge_sort_outer(b, m, buff);
+        merge_sort_outer(m, e, buff+(size)/2);
+        std::copy(buff, buff+size, b);
+        merge_iter(b, m, e, buff);
+    }
+    else
+    {
+        std::copy(b, e, buff);
+    }
+}
+
+template <class TIter>
+void merge_sort_adapter(TIter b, TIter e){
+    std::vector<int> buff(e - b);//typename std::iterator_traits<TIter>::value_type
+    merge_sort_outer(b, e, buff.begin());
+    copy(buff.begin(), buff.end(), b);
+}
+
+void test_merge_sort() {
+
+    typedef vector<int> Array;
+
+    auto sort = [](const vector<int> & v)
+    {
+        auto u = v;
+        merge_sort_adapter(u.begin(), u.end());
+        return u;
+    };
+
+
+    std::cout<< "Start testing:"<< std::endl;
+        test(Array(), sort, Array()); // degerate
+        test(Array({1, 2}), sort, Array({1, 2})); // trivial
+        test(Array({1, 2}), sort, Array({2, 1})); // trivial2
+        test(Array({1, 1}), sort, Array({1, 1})); // trivial2
+
+        test(Array({1, 1, 1}), sort, Array({1, 1, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({1, 2, 3})); // general
+        test(Array({1, 2, 3}), sort, Array({3, 2, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({2, 3, 1})); // general
+
+        test(Array({0, 1, 5, 5, 6, 7, 8}), sort, Array({8, 5, 1, 7, 6, 0, 5})); // general
+
+
+     std::cout<< "Compleated testing!"<< std::endl;
+}
+
+
+/*void test_alter_merge(){
+    typedef vector<int> Array;
+    std::cout<< "Start testing:"<< std::endl;
+    auto sort_fun = my_epic_merge;
+    test(Array({1,2,3,3,4,4,5,5,6,6,7,8}), sort_fun, Array({1,2,3,4,5,6}), Array({3,4,5,6,7,8})); // general
+    std::cout<< "Test complete!"<< std::endl;
+}*/
 
 //template< class Iter, class T>
 //auto search  = bs_by_lb <Array::iterator, int>;
@@ -809,6 +1127,6 @@ void test_array_sort() {
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    test_array_sort();
+    test_merge_sort();
     return a.exec();
 }
