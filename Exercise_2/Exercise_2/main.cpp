@@ -1077,6 +1077,40 @@ void merge_sort_adapter(TIter b, TIter e){
     copy(buff.begin(), buff.end(), b);
 }
 
+/*template <class TIter>
+void merge_sort_whiled_outer(TIter b, TIter e, TIter buff){
+    auto size = e - b;
+    auto starter = b;
+    std::copy(b, e, buff);
+    auto step = e;
+    int step_count=1;
+
+    while(step>2)
+    {
+       step = (b + (step - b))/2;
+       step_count++;
+    }
+
+    while(step_count > 0)
+    {
+        while(starter < e)
+        {
+            auto m = (starter + (step - starter))/2;
+            std::copy(buff, buff+step, starter);
+            merge_iter(starter, m, starter+step, buff);
+            starter=starter+step;
+        }
+        step_count--;
+    }
+}
+
+template <class TIter>
+void merge_sort_whiled_adapter(TIter b, TIter e){
+    std::vector<int> buff(e - b);//typename std::iterator_traits<TIter>::value_type
+    merge_sort_whiled_outer(b, e, buff.begin());
+    copy(buff.begin(), buff.end(), b);
+}*/
+
 void test_merge_sort() {
 
     typedef vector<int> Array;
