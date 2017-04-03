@@ -936,6 +936,18 @@ def merge_sort(v):
 
     v = merge (left, right)
  return v
+/////
+def merge_sort(v):
+ if(len(v) > 2):
+    return v
+
+    m = len(v) // 2
+    left = merge_sort(v[:m])
+    right = merge_sort(v[m:])
+    return merge (left, right)
+
+ v=[9,6,7,1,8]
+ print(merge_sort(v))
 
 */
 /*
@@ -1057,6 +1069,13 @@ void merge_iter( TIter b, TIter m, TIter e, TIter buff )
 template <class TIter>
 void merge_sort_outer(TIter b, TIter e, TIter buff){
     auto size = e - b;
+    /*
+    if(size>1024)
+    {
+       std::copy(b, e, buff);
+       insert_sort(buff, buff+size);
+    } else {
+     */
     if(size > 1) {
         auto m = b + size/2;
         merge_sort_outer(b, m, buff);
@@ -1152,6 +1171,147 @@ void test_merge_sort() {
 //template< class Iter, class T>
 //auto search  = bs_by_lb <Array::iterator, int>;
 
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+/*template <class TIter>
+void quick_sort(TIter b, TIter e){
+    if(e-b < 2)
+    {
+        return;
+    }
+    auto p = select_pivot(b, e);
+     p = partition (b, p ,e);
+    //assert (max (b, p) <= *p && p < min (p+1, e));
+    quick_sort(b, p);
+    quick_sort(p+1, e);
+}*/
+
+template <class TIter>
+TIter pivot_strategy(TIter b, TIter e){
+    assert(b<e);
+    auto m = b + (e-b)/2;
+    auto last = e -1;
+    /*if (*b < * m){
+         if (*m < *last)
+             return m;
+         else
+             return last;
+    }
+    else
+    {
+      return b;
+    }*/
+    //not sure
+    if(*m< *b) swap(b, m);
+    if(*last< *m) swap(last, m);
+    if(*m< *b) swap(b, m);
+    return m;
+}
+
+
+
+template <class TIter>
+TIter my_partition(TIter b, TIter k, TIter e){
+    /*int key = *k;
+
+    while(k < e)
+    {
+        if(k-1 >= b || k+1 < e)
+        {
+            if(*k-1 < key && key < *k+1)
+            {
+                return k;
+            }
+        }
+      k++;
+    }
+    return k;*/
+    assert (b < e);
+    auto pivot  = *k;
+    swap(*(e-1), *k);//adding pivot to the end of it's related group
+    auto ub = b;
+    auto ue = e-1;
+    // [b, ub) [ub, ue) [ue, e)
+    // [ <p  ) [      ) [ p<= )
+    while(ub < ue)
+    {
+       if(*ub < pivot){
+        ++ub;
+       } else {
+        --ue;
+        swap (*ub, *ue);
+       }
+    }
+    std::swap(*ub, *(e-1));
+    return ub;
+}
+
+template <class TIter>
+TIter my_partition_2(TIter b, TIter k, TIter e){
+    assert (b < e);
+    auto pivot  = *k;
+    swap(*(e-1), *k);//adding pivot to the end of it's related group
+    //auto b1 = b;
+    //auto e1 = b;
+    auto b2 = b;//e1;
+    //auto e2 = b;
+    auto ub = b;//e2;
+    auto ue = e;
+    // [b1, e1) [b2, e2) [ub, ue)
+    // [ <p   ) [ p<=  ) [ unpr )
+    while(ub < ue-1)
+    {
+       if(*ub < pivot){
+        swap (*b2, *ub);
+        ++b2;
+       }
+       ++ub;
+    }
+    std::swap(*b2, *(ue-1));
+    return b2;
+}
+
+template <class TIter>
+void quick_sort_simplify(TIter b, TIter e){
+    if(e-b > 1)
+    {
+        auto p = my_partition_2 (b, b ,e);
+        //assert (max (b, p) <= *p && p < min (p+1, e));
+        quick_sort_simplify(b, p);
+        quick_sort_simplify(p+1, e);
+    }
+}
+
+void test_quick_sort() {
+
+    typedef vector<int> Array;
+
+    auto sort = [](const vector<int> & v)
+    {
+        auto u = v;
+        quick_sort_simplify(u.begin(), u.end());
+        return u;
+    };
+
+
+    std::cout<< "Start testing:"<< std::endl;
+        test(Array(), sort, Array()); // degerate
+        test(Array({1, 2}), sort, Array({1, 2})); // trivial
+        test(Array({1, 2}), sort, Array({2, 1})); // trivial2
+        test(Array({1, 1}), sort, Array({1, 1})); // trivial2
+
+        test(Array({1, 1, 1}), sort, Array({1, 1, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({1, 2, 3})); // general
+        test(Array({1, 2, 3}), sort, Array({3, 2, 1})); // general
+        test(Array({1, 2, 3}), sort, Array({2, 3, 1})); // general
+
+        test(Array({0, 1, 5, 5, 6, 7, 8}), sort, Array({8, 5, 1, 7, 6, 0, 5})); // general
+
+
+     std::cout<< "Compleated testing!"<< std::endl;
+}
+
 /*int main(int argc, char const *argv[])
 {
     test_search();
@@ -1161,6 +1321,6 @@ void test_merge_sort() {
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    test_merge_sort();
+    test_quick_sort();
     return a.exec();
 }
